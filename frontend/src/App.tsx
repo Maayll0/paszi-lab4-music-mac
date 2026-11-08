@@ -2,6 +2,7 @@
 import './index.css'
 import { Link, Route, Routes } from 'react-router-dom'
 import RegisterPage from './RegisterPage'
+import AccessDeniedPage from './AccessDeniedPage'
 
 const tracks = [
   {
@@ -71,6 +72,7 @@ function Catalog() {
 function App() {
   return (
     <Routes>
+      <Route path="/access-denied" element={<AccessDeniedPage />} />
       <Route path="/" element={<Catalog />} />
       <Route path="/register" element={<RegisterPage />} />
     </Routes>
