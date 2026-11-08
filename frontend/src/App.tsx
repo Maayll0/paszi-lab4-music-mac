@@ -1,5 +1,7 @@
 
 import './index.css'
+import { Link, Route, Routes } from 'react-router-dom'
+import RegisterPage from './RegisterPage'
 
 const tracks = [
   {
@@ -25,14 +27,14 @@ const tracks = [
   }
 ]
 
-function App() {
+function Catalog() {
   return (
     <div className="app">
       <header className="header">
         <div className="logo">♫ MusicAccess</div>
-        <button className="login-button" disabled>
-          Войти
-        </button>
+        <Link to="/register" className="login-button">
+          Регистрация
+        </Link>
       </header>
 
       <main>
@@ -64,6 +66,14 @@ function App() {
         </section>
       </main>
     </div>
+  )
+}
+function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<Catalog />} />
+      <Route path="/register" element={<RegisterPage />} />
+    </Routes>
   )
 }
 
