@@ -213,3 +213,57 @@ button:disabled {
   font-size: 13px;
   text-align: center;
 }
+
+.denied-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: radial-gradient(circle at top, #301c46, #0c0d14);
+  padding: 24px;
+}
+
+.denied-card {
+  max-width: 520px;
+  text-align: center;
+  padding: 45px;
+  background: #191a26;
+  border: 1px solid #403451;
+  border-radius: 20px;
+}
+
+.denied-icon {
+  font-size: 54px;
+}
+
+.denied-card h1 {
+  color: #ac8cff;
+  font-size: 85px;
+  margin: 12px 0;
+}
+
+.denied-card h2 {
+  font-size: 28px;
+}
+
+.denied-card p {
+  color: #c0bad0;
+  line-height: 1.7;
+}
+
+.denied-info {
+  background: #281d3b;
+  padding: 18px;
+  border-radius: 10px;
+  margin: 24px 0;
+  color: #c6aaff;
+}
+
+.denied-button {
+  display: inline-block;
+  padding: 14px 28px;
+  background: #7351d7;
+  color: white;
+  text-decoration: none;
+  border-radius: 10px;
+}
