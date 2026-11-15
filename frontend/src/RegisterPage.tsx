@@ -2,10 +2,13 @@
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { Link } from 'react-router-dom'
+import { api, errorMessage } from './api'
 
 export default function RegisterPage() {
   const [login, setLogin] = useState('')
   const [password, setPassword] = useState('')
+  const [email, setEmail] = useState('')
+  const [isMusicAccount, setIsMusicAccount] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -25,7 +28,7 @@ export default function RegisterPage() {
       !/[A-Z]/.test(password) ||
       !/[a-z]/.test(password) ||
       !/[0-9]/.test(password) ||
-      !/[^a-zA-Z0-9]/.test(password)
+      !/[^\w\s]|_/.test(password)
     ) {
       setError('Пароль: минимум 8 символов, заглавная и строчная буквы, цифра и спецсимвол')
       return
@@ -34,34 +37,16 @@ export default function RegisterPage() {
     setLoading(true)
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/register', {
+      const data = await api<{ message: string }>('/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ login, password }),
+        body: JSON.stringify({ login, password, email: email || null, is_music_account: isMusicAccount }),
       })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        if (response.status === 409) {
-          throw new Error('Этот логин уже занят')
-        }
-        if (response.status === 422) {
-          throw new Error('Ошибка проверки введённых данных')
-        }
-        throw new Error('Не удалось зарегистрироваться')
-      }
 
       setMessage(data.message || 'Регистрация успешна!')
       setPassword('')
     } catch (err) {
-      setError(
-        err instanceof TypeError
-          ? 'Backend пока недоступен. Подключим его следующим этапом.'
-          : err instanceof Error
-            ? err.message
-            : 'Ошибка подключения'
-      )
+      setError(errorMessage(err))
     } finally {
       setLoading(false)
     }
@@ -84,6 +69,8 @@ export default function RegisterPage() {
             onChange={(e) => setLogin(e.target.value)}
             placeholder="Введите логин"
             autoComplete="username"
+            minLength={3}
+            maxLength={32}
             required
           />
 
@@ -95,11 +82,16 @@ export default function RegisterPage() {
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Введите пароль"
             autoComplete="new-password"
+            maxLength={128}
             required
           />
 
+          <label htmlFor="email">Email</label>
+          <input id="email" type="email" autoComplete="email" maxLength={320} value={email} onChange={e => setEmail(e.target.value)} required />
+          <label className="checkbox-label"><input type="checkbox" checked={isMusicAccount} onChange={e => setIsMusicAccount(e.target.checked)} /> Я регистрирую музыкальный аккаунт</label>
           {error && <div className="auth-error" role="alert">{error}</div>}
           {message && <div className="auth-success" role="status">{message}</div>}
+          {message && <Link to="/login">Перейти ко входу →</Link>}
 
           <button type="submit" disabled={loading}>
             {loading ? 'Регистрация...' : 'Зарегистрироваться'}

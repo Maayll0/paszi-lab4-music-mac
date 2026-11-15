@@ -3,6 +3,8 @@ import './index.css'
 import { Link, Route, Routes } from 'react-router-dom'
 import RegisterPage from './RegisterPage'
 import AccessDeniedPage from './AccessDeniedPage'
+import LoginPage from './LoginPage'
+import AccountPage from './AccountPage'
 
 const tracks = [
   {
@@ -75,6 +77,9 @@ function App() {
       <Route path="/access-denied" element={<AccessDeniedPage />} />
       <Route path="/" element={<Catalog />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/account" element={<AccountPage />} />
+      <Route path="/music" element={<Catalog />} />
     </Routes>
   )
 }

@@ -1,16 +1,19 @@
 
 import re
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 
 class RegisterRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    email: EmailStr | None = None
+    is_music_account: bool = False
     login: str = Field(
         min_length=3,
         max_length=32,
         pattern=r"^[a-zA-Z0-9._-]+$",
     )
-    password: str
+    password: str = Field(max_length=128)
 
     @field_validator("password")
     @classmethod
@@ -27,7 +30,18 @@ class RegisterRequest(BaseModel):
         if not re.search(r"[0-9]", value):
             raise ValueError("Добавьте цифру")
 
-        if not re.search(r"[^a-zA-Z0-9]", value):
+        if not re.search(r"[^\w\s]|_", value):
             raise ValueError("Добавьте специальный символ")
 
         return value
+
+
+class LoginRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    login: str = Field(min_length=1, max_length=32)
+    password: str = Field(min_length=1, max_length=128)
+
+
+class DeleteAccountRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    password: str = Field(min_length=1, max_length=128)
