@@ -144,7 +144,7 @@ npm.cmd run test:e2e
 
 Если Edge отсутствует: `npx.cmd playwright install chromium`, удалите `PLAYWRIGHT_CHANNEL`. Браузерные тесты сами запускают серверы на 8000/5173; эти порты должны быть свободны. Используются временные SQLite/аудиофайлы и случайные тестовые пароли. Основные pytest-тесты по умолчанию используют изолированную SQLite; `TEST_DATABASE_URL` включает PostgreSQL с отдельной случайной схемой на каждый тест. Используйте только выделенную тестовую БД.
 
-GitHub Actions проверяет миграции и pytest на PostgreSQL 17, сборку и браузерные сценарии Chromium, а также настоящую Docker Compose-сборку с API smoke-тестом через Nginx. Локально проверены 29 pytest-тестов, 4 браузерных сценария в Edge, production-сборка, миграция и seed на отдельной SQLite. PostgreSQL-тесты и Chromium также успешно прошли в CI; Docker проверяется отдельным заданием. Docker/PostgreSQL в локальном Windows-окружении не установлены.
+GitHub Actions проверяет миграции и pytest на PostgreSQL 17, сборку и браузерные сценарии Chromium, а также настоящую Docker Compose-сборку с API smoke-тестом через Nginx. Локально проверены 29 pytest-тестов, 4 браузерных сценария в Edge, production-сборка, миграция и seed на отдельной SQLite. PostgreSQL-тесты, Chromium и сборка/запуск Docker Compose со smoke-тестом успешно прошли в CI. Docker/PostgreSQL в локальном Windows-окружении не установлены. Подтверждения и история этапов: [report/verification.md](report/verification.md).
 
 ## Отчёт
 
