@@ -18,3 +18,8 @@ frontend/dist/
 
 # IDE
 .vscode/
+backend/media/
+*.db
+report/screenshots/
+frontend/test-results/
+frontend/playwright-report/
