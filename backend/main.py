@@ -6,15 +6,15 @@ from pathlib import Path
 import secrets
 import time
 
-from fastapi import Depends, FastAPI, HTTPException, Request, Response
+from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from sqlalchemy import delete, select
+from sqlalchemy import delete, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from backend.database import get_db
-from backend.models import AuthSession, SecurityLevel, User
+from backend.models import AuthSession, SecurityLevel, Track, User
 from backend.schemas import DeleteAccountRequest, LoginRequest, RegisterRequest
 from backend.security import hash_password, password_hasher, verify_password
 
@@ -169,3 +169,32 @@ def delete_account(payload: DeleteAccountRequest, response: Response,
     db.commit()
     response.delete_cookie(COOKIE, path="/", httponly=True, secure=SECURE_COOKIE, samesite="lax")
     log("account_deleted", user_id=user.id)
+
+
+def track_data(track: Track):
+    return {"id": track.id, "title": track.title, "artist": track.artist,
+            "security_level": track.security_level, "duration": track.duration}
+
+
+@app.get("/api/tracks")
+@app.get("/api/tracks/search")
+def tracks(q: str = Query(default="", max_length=100), title: str = Query(default="", max_length=100),
+           artist: str = Query(default="", max_length=100), db: Session = Depends(get_db)):
+    # Catalogue metadata is PUBLIC; audio is the protected resource.
+    query = select(Track)
+    if q.strip():
+        query = query.where(or_(Track.title.icontains(q.strip(), autoescape=True),
+                                Track.artist.icontains(q.strip(), autoescape=True)))
+    if title.strip():
+        query = query.where(Track.title.icontains(title.strip(), autoescape=True))
+    if artist.strip():
+        query = query.where(Track.artist.icontains(artist.strip(), autoescape=True))
+    return [track_data(track) for track in db.scalars(query.order_by(Track.id).limit(100))]
+
+
+@app.get("/api/tracks/{track_id}")
+def track_detail(track_id: int, db: Session = Depends(get_db)):
+    track = db.get(Track, track_id)
+    if track is None:
+        raise HTTPException(404, "Трек не найден")
+    return track_data(track)
