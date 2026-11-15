@@ -290,6 +290,10 @@ a:focus-visible, button:focus-visible { outline: 2px solid #c6aaff; outline-offs
 .filters { display: flex; flex-wrap: wrap; gap: 16px; align-items: end; margin-bottom: 24px; }
 .filters label { flex: 1; min-width: 180px; }
 .track-detail { max-width: 650px; margin: 24px auto; }
+.player { margin-top: 24px; }
+.player audio { width: 100%; }
+.player-navigation { display: flex; gap: 12px; margin: 16px 0; }
+.player small { color: #aaa8bd; }
 @media (max-width: 600px) {
   .header { align-items: start; flex-direction: column; gap: 20px; }
   .header nav { gap: 14px; }

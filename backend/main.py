@@ -8,7 +8,7 @@ import time
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
 from sqlalchemy import delete, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -17,6 +17,7 @@ from backend.database import get_db
 from backend.models import AuthSession, SecurityLevel, Track, User
 from backend.schemas import DeleteAccountRequest, LoginRequest, RegisterRequest
 from backend.security import hash_password, password_hasher, verify_password
+from backend.access import require_read_access
 
 app = FastAPI(title="MusicAccess API", version="1.0.0")
 logger = logging.getLogger("musicaccess")
@@ -29,6 +30,7 @@ COOKIE = "musicaccess_session"
 SECURE_COOKIE = os.getenv("APP_ENV", "development") == "production"
 SESSION_SECONDS = 60 * 60 * 12
 DUMMY_HASH = hash_password("Unknown-account-123!")
+MEDIA_DIR = Path(os.getenv("MEDIA_DIR", "backend/media")).resolve()
 
 
 def log(event: str, level=logging.INFO, **fields):
@@ -198,3 +200,27 @@ def track_detail(track_id: int, db: Session = Depends(get_db)):
     if track is None:
         raise HTTPException(404, "Трек не найден")
     return track_data(track)
+
+
+@app.get("/api/me/tracks")
+def available_tracks(user: User = Depends(current_user), db: Session = Depends(get_db)):
+    return [track_data(track) for track in db.scalars(
+        select(Track).where(Track.security_level <= user.clearance_level).order_by(Track.id))]
+
+
+@app.get("/api/tracks/{track_id}/stream")
+def stream(track_id: int, user: User = Depends(current_user), db: Session = Depends(get_db)):
+    track = db.get(Track, track_id)
+    if track is None:
+        raise HTTPException(404, "Трек не найден")
+    try:
+        require_read_access(user, track)
+    except HTTPException:
+        log("mac_denied", user_id=user.id, track_id=track.id, status=403)
+        raise
+    path = (MEDIA_DIR / track.file_path).resolve()
+    if not path.is_relative_to(MEDIA_DIR) or not path.is_file():
+        raise HTTPException(404, "Аудиофайл не найден")
+    log("mac_allowed", user_id=user.id, track_id=track.id)
+    # Starlette handles Range only AFTER authentication and the MAC check.
+    return FileResponse(path, media_type="audio/wav")
