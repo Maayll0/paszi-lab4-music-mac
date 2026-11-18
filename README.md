@@ -57,7 +57,7 @@ python scripts/compose_smoke.py
 | Метод и путь | Назначение |
 |---|---|
 | GET `/health` | Проверка работы процесса API |
-| POST `/register` | `login`, `password`; необязательные `email`, `is_music_account`; 201, 409, 422 |
+| POST `/register` | `login`, `password`; необязательные `email`; 201, 409, 422 |
 | POST `/login` | `login`, `password`; устанавливает cookie, возвращает `user` и `csrf_token`; неверный пароль — 401 |
 | GET `/me` | Текущий профиль и CSRF-токен; 401 без действующей сессии |
 | POST `/logout` | Отзывает текущую сессию; 204 |
@@ -104,14 +104,14 @@ rm cookies.txt
 
 ## База данных и миграции
 
-`users(id, login, email, password_hash, clearance_level, created_at, is_music_account)`, `tracks(id, title, artist, security_level, file_path, duration, created_at)`, `sessions(token_hash, user_id, csrf_token, expires_at)`. Уникальный логин, ограничения меток 1–3, внешний ключ сессий с `ON DELETE CASCADE`.
+`users(id, login, email, password_hash, clearance_level, created_at)`, `tracks(id, title, artist, security_level, file_path, duration, created_at)`, `sessions(token_hash, user_id, csrf_token, expires_at)`. Уникальный логин, ограничения меток 1–3, внешний ключ сессий с `ON DELETE CASCADE`.
 
 На старте проверены `main`, `feature/database`, удалённая `feature/DB` и существующие PR: опубликованной схемы БД там не было. Добавлена единая схема в `backend/models.py` и миграция `0001`, без переписывания истории или чужих веток.
 
 ```powershell
 docker compose exec backend python -m alembic current
 docker compose exec backend python -m alembic check
-docker compose exec db psql -U musicaccess -d musicaccess -c "SELECT id, login, clearance_level, is_music_account, left(password_hash, 10) AS hash_scheme FROM users;"
+docker compose exec db psql -U musicaccess -d musicaccess -c "SELECT id, login, clearance_level, left(password_hash, 10) AS hash_scheme FROM users;"
 docker compose exec db psql -U musicaccess -d musicaccess -c "SELECT id, title, artist, security_level, duration FROM tracks;"
 ```
 

@@ -8,7 +8,6 @@ export default function RegisterPage() {
   const [login, setLogin] = useState('')
   const [password, setPassword] = useState('')
   const [email, setEmail] = useState('')
-  const [isMusicAccount, setIsMusicAccount] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -40,7 +39,7 @@ export default function RegisterPage() {
       const data = await api<{ message: string }>('/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ login, password, email: email || null, is_music_account: isMusicAccount }),
+        body: JSON.stringify({ login, password, email: email || null }),
       })
 
       setMessage(data.message || 'Регистрация успешна!')
@@ -88,7 +87,6 @@ export default function RegisterPage() {
 
           <label htmlFor="email">Email</label>
           <input id="email" type="email" autoComplete="email" maxLength={320} value={email} onChange={e => setEmail(e.target.value)} required />
-          <label className="checkbox-label"><input type="checkbox" checked={isMusicAccount} onChange={e => setIsMusicAccount(e.target.checked)} /> Я регистрирую музыкальный аккаунт</label>
           {error && <div className="auth-error" role="alert">{error}</div>}
           {message && <div className="auth-success" role="status">{message}</div>}
           {message && <Link to="/login">Перейти ко входу →</Link>}

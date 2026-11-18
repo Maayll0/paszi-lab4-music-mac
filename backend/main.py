@@ -95,7 +95,7 @@ def csrf(request: Request, session: AuthSession = Depends(current_session)):
 
 def user_data(user: User):
     return {"id": user.id, "login": user.login, "email": user.email,
-            "is_music_account": user.is_music_account, "clearance_level": user.clearance_level}
+            "clearance_level": user.clearance_level}
 
 
 @app.get("/")
@@ -112,7 +112,7 @@ def health():
 def register(payload: RegisterRequest, db: Session = Depends(get_db)):
     user = User(login=payload.login.lower(), password_hash=hash_password(payload.password),
                 email=str(payload.email) if payload.email else None,
-                is_music_account=payload.is_music_account, clearance_level=SecurityLevel.PUBLIC)
+                clearance_level=SecurityLevel.PUBLIC)
     db.add(user)
     try:
         db.commit()

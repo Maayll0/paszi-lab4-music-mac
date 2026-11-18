@@ -1,4 +1,4 @@
-export type User = { id: number; login: string; email: string | null; clearance_level: number; is_music_account: boolean }
+export type User = { id: number; login: string; email: string | null; clearance_level: number }
 export type Session = { user: User; csrf_token: string }
 export const levels: Record<number, string> = { 1: 'Public', 2: 'Confidential', 3: 'Secret' }
 
