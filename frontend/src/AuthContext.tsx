@@ -25,7 +25,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('focus', update)
   }, [])
   async function logout() {
-    try { await api('/logout', { method: 'POST', headers: { 'X-CSRF-Token': session?.csrf_token ?? '' } }) }
+    try { await api('/logout', { method: 'POST' }) }
     catch (err) { if (!(err instanceof ApiError && err.status === 401)) throw err }
     setSession(null)
   }

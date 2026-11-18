@@ -1,5 +1,5 @@
 export type User = { id: number; login: string; email: string | null; clearance_level: number }
-export type Session = { user: User; csrf_token: string }
+export type Session = { user: User }
 export const levels: Record<number, string> = { 1: 'Public', 2: 'Confidential', 3: 'Secret' }
 
 export class ApiError extends Error {

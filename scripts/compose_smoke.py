@@ -30,6 +30,6 @@ assert request("/api/me").status == 200
 stream = request("/api/tracks/1/stream", headers={"Range": "bytes=0-9"})
 assert stream.status == 206 and stream.read().startswith(b"RIFF")
 assert request("/api/tracks/2/stream").status == 403
-assert request("/api/me", "DELETE", {"password": account["password"]}, {"X-CSRF-Token": session["csrf_token"]}).status == 204
+assert request("/api/me", "DELETE", {"password": account["password"]}).status == 204
 assert request("/api/me").status == 401
 print("Compose smoke passed: registration, PostgreSQL persistence, session, search, range stream, MAC, deletion")

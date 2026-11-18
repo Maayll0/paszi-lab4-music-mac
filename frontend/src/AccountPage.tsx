@@ -18,7 +18,7 @@ export default function AccountPage() {
     if (!confirmed || !session) return
     setBusy(true); setError('')
     try {
-      await api('/me', { method: 'DELETE', headers: { 'X-CSRF-Token': session.csrf_token }, body: JSON.stringify({ password }) })
+      await api('/me', { method: 'DELETE', body: JSON.stringify({ password }) })
       setSession(null); navigate('/login', { replace: true })
     } catch (err) { setError(errorMessage(err)) }
     finally { setBusy(false) }

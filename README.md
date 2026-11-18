@@ -52,16 +52,16 @@ python scripts/compose_smoke.py
 
 ## API
 
-Все пути начинаются с `/api`. Запросы изменения данных требуют заголовок `X-MusicAccess: 1`. Для logout и удаления дополнительно нужен `X-CSRF-Token` из `/login` или `/me`.
+Все пути начинаются с `/api`. Запросы изменения данных требуют заголовок `X-MusicAccess: 1`.
 
 | Метод и путь | Назначение |
 |---|---|
 | GET `/health` | Проверка работы процесса API |
 | POST `/register` | `login`, `password`; необязательные `email`; 201, 409, 422 |
-| POST `/login` | `login`, `password`; устанавливает cookie, возвращает `user` и `csrf_token`; неверный пароль — 401 |
-| GET `/me` | Текущий профиль и CSRF-токен; 401 без действующей сессии |
+| POST `/login` | `login`, `password`; устанавливает cookie, возвращает `user`; неверный пароль — 401 |
+| GET `/me` | Текущий профиль; 401 без действующей сессии |
 | POST `/logout` | Отзывает текущую сессию; 204 |
-| DELETE `/me` | JSON `password`, проверка CSRF; удаляет профиль и все его сессии; 204 |
+| DELETE `/me` | JSON `password`; удаляет профиль и все его сессии; 204 |
 | GET `/tracks` | Каталог; `q` ищет по названию **или** исполнителю |
 | GET `/tracks/search` | Тот же поиск; `title` и `artist` применяются совместно через AND |
 | GET `/tracks/{id}` | Публичные метаданные одного трека; 404, если нет |
@@ -85,26 +85,14 @@ curl -b cookies.txt "$BASE/api/me"
 curl "$BASE/api/tracks?title=Night&artist=Electronic"
 curl -i -b cookies.txt -H 'Range: bytes=0-9' "$BASE/api/tracks/1/stream"
 curl -i -b cookies.txt "$BASE/api/tracks/2/stream"  # 403 для Public
-read -p 'csrf_token из ответа login/me: ' CSRF
-curl -i -b cookies.txt -X POST "$BASE/api/logout" -H 'X-MusicAccess: 1' -H "X-CSRF-Token: $CSRF"
-unset PASSWORD CSRF
 rm cookies.txt
 ```
 
 В PowerShell используйте `curl.exe`, чтобы избежать алиаса `Invoke-WebRequest`. Cookie-файлы временные и содержат секрет сессии; не добавляйте их в Git.
 
-## Безопасность
-
-- Пароли хранятся только в Argon2id: по умолчанию 3 итерации, 65536 KiB памяти, параллелизм 2; параметры задаются окружением. Длина пароля 8–128, латинские заглавная/строчная буквы, цифра и специальный символ; пробел сам по себе спецсимволом не считается. Логин 3–32 символа, `[A-Za-z0-9._-]`; уникальность без учёта регистра.
-- Сессия — случайный 256-битный opaque token. БД хранит SHA-256 токена, пользователя, CSRF-токен и срок 12 часов. Паролей и bearer-токенов в localStorage нет. Вход заменяет прежнюю сессию этого браузера, выход отзывает её; удаление аккаунта отзывает все его сессии.
-- Cookie: `HttpOnly`, `SameSite=Lax`, host-only, `Path=/`. В `APP_ENV=production` включён `Secure`: потребуется HTTPS перед Nginx. Локальная демонстрация по HTTP использует `development`. `SECRET_KEY` предусмотрен в конфигурации как резерв; выбранные серверные сессии не подписывают JWT и не зависят от этого ключа.
-- Изменяющие запросы требуют нестандартный заголовок, запрещён `Sec-Fetch-Site: cross-site`; CORS не включён. Клиент и API работают с одного origin через Vite/Nginx proxy. Аутентифицированные изменения дополнительно проверяют CSRF-токен сессии. Страница Swagger при ручных POST требует эти же заголовки.
-- Поток не имеет публичного статического маршрута, путь проверяется на выход за `MEDIA_DIR`, ответы API не кэшируются. Полученные ранее разрешённые байты невозможно «отозвать» из памяти клиента; новый запрос всегда проверяется заново.
-- Логи — JSON с INFO/ERROR: успешные операции, занятый логин, валидация, отказы MAC и внутренние ошибки. Пароли, cookie и CSRF-токены не логируются. Ответ 422 не содержит поле `input` с введёнными секретами.
-
 ## База данных и миграции
 
-`users(id, login, email, password_hash, clearance_level, created_at)`, `tracks(id, title, artist, security_level, file_path, duration, created_at)`, `sessions(token_hash, user_id, csrf_token, expires_at)`. Уникальный логин, ограничения меток 1–3, внешний ключ сессий с `ON DELETE CASCADE`.
+`users(id, login, email, password_hash, clearance_level, created_at)`, `tracks(id, title, artist, security_level, file_path, duration, created_at)`, `sessions(token_hash, user_id, expires_at)`. Уникальный логин, ограничения меток 1–3, внешний ключ сессий с `ON DELETE CASCADE`.
 
 На старте проверены `main`, `feature/database`, удалённая `feature/DB` и существующие PR: опубликованной схемы БД там не было. Добавлена единая схема в `backend/models.py` и миграция `0001`, без переписывания истории или чужих веток.
 

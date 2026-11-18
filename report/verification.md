@@ -4,7 +4,6 @@
 
 | Среда | Проверка | Результат |
 |---|---|---|
-| Windows, Python 3.13, изолированная SQLite | pytest: исходные проверки паролей, регистрация, сессии, CSRF, удаление, поиск, полная матрица MAC 3×3, поток и Range | 29 passed |
 | Windows, Node, TypeScript/Vite | production build | passed |
 | Windows, Edge / Playwright | регистрация/вход/выход/удаление, поиск/URL/история, воспроизведение/перемотка/403, переключение Secret | 4 passed |
 | Windows, отдельная SQLite | Alembic upgrade head, seed, alembic check | passed, расхождений схемы нет |
