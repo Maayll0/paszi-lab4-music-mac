@@ -59,10 +59,14 @@ def test_full_stream_range_errors_and_label_change(client, db_factory, media):
     assert client.get("/api/tracks/1/stream").status_code == 403
 
 
-def test_media_path_containment(client, db_factory, media, tmp_path):
+def test_media_path_containment(client, db_factory, media, tmp_path, monkeypatch):
     account = {"login": "listener", "password": "Strong123!"}
     client.post("/api/register", json=account)
     client.post("/api/login", json=account)
+    media_dir = tmp_path / "media"
+    media_dir.mkdir()
+    monkeypatch.setattr(main, "MEDIA_DIR", media_dir)
+    (tmp_path / "private.txt").write_text("test file")
     with db_factory() as db:
         db.get(Track, 1).file_path = "../private.txt"
         db.commit()
