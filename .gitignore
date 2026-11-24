@@ -24,3 +24,4 @@ report/screenshots/
 frontend/test-results/
 frontend/playwright-report/
 cookies.txt
+/report.7z

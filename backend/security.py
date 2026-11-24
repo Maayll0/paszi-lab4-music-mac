@@ -20,12 +20,10 @@ password_hasher = PasswordHasher(
 
 
 def hash_password(password: str) -> str:
-    """Создание хэша пароля с использованием Argon2id."""
     return password_hasher.hash(password)
 
 
 def verify_password(password: str, password_hash: str) -> bool:
-    """Проверка введённого пароля."""
     try:
         return password_hasher.verify(password_hash, password)
     except (VerificationError, InvalidHashError):
